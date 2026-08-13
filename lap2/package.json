@@ -11,5 +11,13 @@
     "mock": "prism mock openapi.yaml --port 4010",
     "test:mock:curl": "bash scripts/test_mock_with_curl.sh"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@faker-js/faker": "5.5.3",
+    "@stoplight/prism-cli": "^5.8.1"
+  },
+  "overrides": {
+    "@faker-js/faker": "5.5.3",
+    "http-proxy-agent": "5.0.0",
+    "https-proxy-agent": "5.0.1"
+  }
 }
