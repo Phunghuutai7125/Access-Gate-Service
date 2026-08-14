@@ -1,0 +1,48 @@
+name: Newman Contract Tests (Lab 03 - team-gate)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lap3/FIT4110_lab03_postman_mock_testing
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint OpenAPI contracts
+        run: npm run lint:contracts
+
+      - name: Start Prism mock server (team-gate)
+        run: nohup npm run mock:gate > prism-gate.log 2>&1 &
+
+      - name: Wait for mock server
+        run: npx wait-on http://localhost:4010/health --timeout 30000
+
+      - name: Run Newman contract tests (team-gate)
+        run: npm run test:gate:mock
+
+      - name: Show Prism logs on failure
+        if: failure()
+        run: cat prism-gate.log || true
+
+      - name: Upload Newman reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-reports-lab03
+          path: lap3/FIT4110_lab03_postman_mock_testing/reports/
