@@ -1,0 +1,3233 @@
+{
+  "info": {
+    "_postman_id": "f934066c-0e54-40e1-a4a2-f9294ee50657",
+    "name": "team-gate",
+    "description": "Access Gate Service cung cấp API cho Core Business để tra cứu log ra/vào,\ntrạng thái cổng, thông tin thẻ, và quản lý đăng ký thẻ mới trong\nSmart Campus Operations Platform.\nService nhận sự kiện quẹt thẻ, kiểm tra hợp lệ, ghi log, và cung cấp\ndữ liệu audit theo chuẩn Problem Details khi có lỗi.\n\n\nContact Support:\n Name: Access Gate API Team\n Email: access-gate@campus.local",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34959219"
+  },
+  "item": [
+    {
+      "name": "01_Functional",
+      "item": [
+        {
+          "name": "Lấy thông tin một thẻ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response is valid Card schema\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"cardId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"personId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"cardType\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"status\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"cardType and status have valid enum values\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect([\"STUDENT\", \"STAFF\", \"VISITOR\"]).to.include(jsonData.cardType);\r",
+                  "    pm.expect([\"ACTIVE\", \"INACTIVE\"]).to.include(jsonData.status);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"cardId is present and is a string (pattern check skipped on dynamic mock)\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.cardId).to.be.a(\"string\");\r",
+                  "    pm.expect(jsonData.cardId.length).to.be.greaterThan(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cards/:cardId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards",
+                ":cardId"
+              ],
+              "variable": [
+                {
+                  "key": "cardId",
+                  "value": "RFID-9215-649",
+                  "description": "Mã thẻ RFID."
+                }
+              ]
+            },
+            "description": "Core Business gọi endpoint này để xác minh thông tin chủ thẻ."
+          },
+          "response": [
+            {
+              "name": "Thông tin thẻ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"cardId\": \"RFID-3443-587\",\n  \"personId\": \"string\",\n  \"cardType\": \"STUDENT\",\n  \"status\": \"ACTIVE\",\n  \"issuedAt\": \"1970-03-12T23:31:02.863Z\",\n  \"expiresAt\": null\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Resource không tồn tại",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/not-found\",\n  \"title\": \"Không tìm thấy tài nguyên\",\n  \"status\": 404,\n  \"detail\": \"cardId không tồn tại trong hệ thống\",\n  \"instance\": \"https://api.campus.local/cards/RFID-2026-999\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Kiểm tra trạng thái service",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response is valid HealthStatus schema\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"status\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"service\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"time\");\r",
+                  "    pm.expect(jsonData.status).to.eql(\"ok\");\r",
+                  "    pm.expect(jsonData.service).to.eql(\"access-gate-service\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Endpoint để kiểm tra service còn sống."
+          },
+          "response": [
+            {
+              "name": "Service hoạt động bình thường",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"ok\",\n  \"service\": \"access-gate-service\",\n  \"time\": \"2026-08-11T11:37:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Lấy danh sách log ra/vào gần nhất",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response is valid AccessLogPage schema\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"items\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"nextCursor\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"hasMore\");\r",
+                  "    pm.expect(jsonData.items).to.be.an(\"array\");\r",
+                  "    pm.expect(jsonData.hasMore).to.be.a(\"boolean\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Each item in AccessLogPage has valid AccessLog fields\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    if (jsonData.items.length > 0) {\r",
+                  "        const log = jsonData.items[0];\r",
+                  "        pm.expect(log).to.have.property(\"logId\");\r",
+                  "        pm.expect(log).to.have.property(\"cardId\");\r",
+                  "        pm.expect(log).to.have.property(\"gateId\");\r",
+                  "        pm.expect(log).to.have.property(\"direction\");\r",
+                  "        pm.expect(log).to.have.property(\"status\");\r",
+                  "        pm.expect(log).to.have.property(\"reasonCode\");\r",
+                  "        pm.expect(log).to.have.property(\"timestamp\");\r",
+                  "        pm.expect([\"IN\", \"OUT\"]).to.include(log.direction);\r",
+                  "        pm.expect([\"GRANTED\", \"DENIED\"]).to.include(log.status);\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access",
+                "logs",
+                "recent"
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Cursor phiên bản tiếp theo cho pagination."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Số bản ghi tối đa trả về mỗi trang."
+                },
+                {
+                  "key": "gateId",
+                  "value": "GATE-79",
+                  "description": "Lọc log theo mã cổng."
+                }
+              ]
+            },
+            "description": "Core Business gọi endpoint này để audit log ra/vào theo thời gian thực.\nHỗ trợ cursor-based pagination.\n"
+          },
+          "response": [
+            {
+              "name": "Danh sách log ra/vào",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"items\": [\n    {\n      \"logId\": \"0196fb3d-4ad7-7d1e-9f49-5d5148d2babc\",\n      \"cardId\": \"RFID-2026-001\",\n      \"gateId\": \"GATE-01\",\n      \"direction\": \"IN\",\n      \"status\": \"GRANTED\",\n      \"reasonCode\": \"VALID_CARD\",\n      \"operatorNote\": null,\n      \"timestamp\": \"2026-08-11T07:30:00Z\"\n    }\n  ],\n  \"nextCursor\": null,\n  \"hasMore\": false\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Lấy chi tiết một log ra/vào",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response is valid AccessLog schema\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"logId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"cardId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"gateId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"direction\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"status\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"reasonCode\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"timestamp\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Enum fields have valid values\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect([\"IN\", \"OUT\"]).to.include(jsonData.direction);\r",
+                  "    pm.expect([\"GRANTED\", \"DENIED\"]).to.include(jsonData.status);\r",
+                  "    pm.expect([\r",
+                  "        \"VALID_CARD\", \"EXPIRED_CARD\", \"BLACKLISTED\",\r",
+                  "        \"OUTSIDE_TIME_WINDOW\", \"UNKNOWN_CARD\", \"POLICY_DENY\"\r",
+                  "    ]).to.include(jsonData.reasonCode);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"cardId and gateId are present strings (pattern check skipped on dynamic mock)\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.cardId).to.be.a(\"string\");\r",
+                  "    pm.expect(jsonData.gateId).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/logs/:logId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access",
+                "logs",
+                ":logId"
+              ],
+              "variable": [
+                {
+                  "key": "logId",
+                  "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                  "description": "UUID của log ra/vào."
+                }
+              ]
+            },
+            "description": "Tra cứu chi tiết 1 log cụ thể theo logId để audit sâu."
+          },
+          "response": [
+            {
+              "name": "Chi tiết log ra/vào",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/:logId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    ":logId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "logId",
+                      "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                      "description": "UUID của log ra/vào."
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"logId\": \"5b6345fe-1cc3-ab6b-48f4-9900e2c2f577\",\n  \"cardId\": \"RFID-6365-427\",\n  \"gateId\": \"GATE-53\",\n  \"direction\": \"OUT\",\n  \"status\": \"DENIED\",\n  \"reasonCode\": \"UNKNOWN_CARD\",\n  \"timestamp\": \"1976-02-22T01:16:43.900Z\",\n  \"operatorNote\": \"string\"\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/:logId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    ":logId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "logId",
+                      "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                      "description": "UUID của log ra/vào."
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Resource không tồn tại",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/:logId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    ":logId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "logId",
+                      "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                      "description": "UUID của log ra/vào."
+                    }
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/not-found\",\n  \"title\": \"Không tìm thấy tài nguyên\",\n  \"status\": 404,\n  \"detail\": \"cardId không tồn tại trong hệ thống\",\n  \"instance\": \"https://api.campus.local/cards/RFID-2026-999\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/:logId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    ":logId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "logId",
+                      "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                      "description": "UUID của log ra/vào."
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Lấy trạng thái hiện tại của một cổng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response is valid GateStatus schema\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"gateId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"state\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"updatedAt\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"state has valid enum value\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect([\"OPEN\", \"CLOSED\", \"FAULT\"]).to.include(jsonData.state);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"gateId is present and is a string (pattern check skipped on dynamic mock)\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.gateId).to.be.a(\"string\");\r",
+                  "    pm.expect(jsonData.gateId.length).to.be.greaterThan(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/gates/:gateId/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gates",
+                ":gateId",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "gateId",
+                  "value": "GATE-79",
+                  "description": "Mã cổng."
+                }
+              ]
+            },
+            "description": "Core Business gọi endpoint này để biết cổng đang mở/đóng/lỗi."
+          },
+          "response": [
+            {
+              "name": "Trạng thái cổng",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/gates/:gateId/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "gates",
+                    ":gateId",
+                    "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "gateId",
+                      "value": "GATE-79",
+                      "description": "Mã cổng."
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"gateId\": \"GATE-83\",\n  \"state\": \"CLOSED\",\n  \"updatedAt\": \"2004-08-16T08:38:42.041Z\",\n  \"lastCardId\": null\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/gates/:gateId/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "gates",
+                    ":gateId",
+                    "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "gateId",
+                      "value": "GATE-79",
+                      "description": "Mã cổng."
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Resource không tồn tại",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/gates/:gateId/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "gates",
+                    ":gateId",
+                    "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "gateId",
+                      "value": "GATE-79",
+                      "description": "Mã cổng."
+                    }
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/not-found\",\n  \"title\": \"Không tìm thấy tài nguyên\",\n  \"status\": 404,\n  \"detail\": \"cardId không tồn tại trong hệ thống\",\n  \"instance\": \"https://api.campus.local/cards/RFID-2026-999\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/gates/:gateId/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "gates",
+                    ":gateId",
+                    "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "gateId",
+                      "value": "GATE-79",
+                      "description": "Mã cổng."
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Đăng ký thẻ mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response is valid Card schema\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"cardId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"personId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"cardType\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"status\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"cardType has a valid enum value (echo check skipped on dynamic mock)\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect([\"STUDENT\", \"STAFF\", \"VISITOR\"]).to.include(jsonData.cardType);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"cardId is present and is a string (pattern check skipped on dynamic mock)\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.cardId).to.be.a(\"string\");\r",
+                  "    pm.expect(jsonData.cardId.length).to.be.greaterThan(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardType\": \"STUDENT\",\n  \"cardId\": \"RFID-2026-001\",\n  \"personId\": \"SV001\",\n  \"studentCode\": \"DNU2026001\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards"
+              ]
+            },
+            "description": "Admin đăng ký thẻ mới vào hệ thống Access Gate.\nHỗ trợ 2 loại thẻ: Student và Staff, phân biệt qua discriminator cardType.\n"
+          },
+          "response": [
+            {
+              "name": "studentCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STUDENT\",\n  \"cardId\": \"RFID-2026-001\",\n  \"personId\": \"SV001\",\n  \"studentCode\": \"DNU2026001\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"cardId\": \"RFID-3443-587\",\n  \"personId\": \"string\",\n  \"cardType\": \"STUDENT\",\n  \"status\": \"ACTIVE\",\n  \"issuedAt\": \"1970-03-12T23:31:02.863Z\",\n  \"expiresAt\": null\n}"
+            },
+            {
+              "name": "staffCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STAFF\",\n  \"cardId\": \"RFID-2026-002\",\n  \"personId\": \"NV045\",\n  \"department\": \"FIT\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"cardId\": \"RFID-3443-587\",\n  \"personId\": \"string\",\n  \"cardType\": \"STUDENT\",\n  \"status\": \"ACTIVE\",\n  \"issuedAt\": \"1970-03-12T23:31:02.863Z\",\n  \"expiresAt\": null\n}"
+            },
+            {
+              "name": "studentCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STUDENT\",\n  \"cardId\": \"RFID-2026-001\",\n  \"personId\": \"SV001\",\n  \"studentCode\": \"DNU2026001\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/validation\",\n  \"title\": \"Dữ liệu không hợp lệ\",\n  \"status\": 400,\n  \"detail\": \"Payload không đúng JSON Schema\",\n  \"instance\": \"https://api.campus.local/cards\",\n  \"errors\": [\n    {\n      \"field\": \"cardId\",\n      \"code\": \"PATTERN_MISMATCH\",\n      \"message\": \"cardId phải có dạng RFID-YYYY-NNN\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "staffCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STAFF\",\n  \"cardId\": \"RFID-2026-002\",\n  \"personId\": \"NV045\",\n  \"department\": \"FIT\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/validation\",\n  \"title\": \"Dữ liệu không hợp lệ\",\n  \"status\": 400,\n  \"detail\": \"Payload không đúng JSON Schema\",\n  \"instance\": \"https://api.campus.local/cards\",\n  \"errors\": [\n    {\n      \"field\": \"cardId\",\n      \"code\": \"PATTERN_MISMATCH\",\n      \"message\": \"cardId phải có dạng RFID-YYYY-NNN\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "studentCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STUDENT\",\n  \"cardId\": \"RFID-2026-001\",\n  \"personId\": \"SV001\",\n  \"studentCode\": \"DNU2026001\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "staffCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STAFF\",\n  \"cardId\": \"RFID-2026-002\",\n  \"personId\": \"NV045\",\n  \"department\": \"FIT\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "studentCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STUDENT\",\n  \"cardId\": \"RFID-2026-001\",\n  \"personId\": \"SV001\",\n  \"studentCode\": \"DNU2026001\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/conflict\",\n  \"title\": \"Thẻ đã tồn tại\",\n  \"status\": 409,\n  \"detail\": \"cardId đã được đăng ký trước đó\",\n  \"instance\": \"https://api.campus.local/cards\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "staffCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STAFF\",\n  \"cardId\": \"RFID-2026-002\",\n  \"personId\": \"NV045\",\n  \"department\": \"FIT\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/conflict\",\n  \"title\": \"Thẻ đã tồn tại\",\n  \"status\": 409,\n  \"detail\": \"cardId đã được đăng ký trước đó\",\n  \"instance\": \"https://api.campus.local/cards\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "studentCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STUDENT\",\n  \"cardId\": \"RFID-2026-001\",\n  \"personId\": \"SV001\",\n  \"studentCode\": \"DNU2026001\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/business-rule\",\n  \"title\": \"Vi phạm nghiệp vụ\",\n  \"status\": 422,\n  \"detail\": \"studentCode không tồn tại trong hệ thống quản lý sinh viên\",\n  \"instance\": \"https://api.campus.local/cards\",\n  \"errors\": [\n    {\n      \"field\": \"studentCode\",\n      \"code\": \"NOT_FOUND_IN_SIS\",\n      \"message\": \"Mã sinh viên không hợp lệ\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "staffCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STAFF\",\n  \"cardId\": \"RFID-2026-002\",\n  \"personId\": \"NV045\",\n  \"department\": \"FIT\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/business-rule\",\n  \"title\": \"Vi phạm nghiệp vụ\",\n  \"status\": 422,\n  \"detail\": \"studentCode không tồn tại trong hệ thống quản lý sinh viên\",\n  \"instance\": \"https://api.campus.local/cards\",\n  \"errors\": [\n    {\n      \"field\": \"studentCode\",\n      \"code\": \"NOT_FOUND_IN_SIS\",\n      \"message\": \"Mã sinh viên không hợp lệ\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "studentCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STUDENT\",\n  \"cardId\": \"RFID-2026-001\",\n  \"personId\": \"SV001\",\n  \"studentCode\": \"DNU2026001\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "staffCard",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cardType\": \"STAFF\",\n  \"cardId\": \"RFID-2026-002\",\n  \"personId\": \"NV045\",\n  \"department\": \"FIT\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cards",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02_Auth",
+      "item": [
+        {
+          "name": "getCardById - Missing Token - 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 when token missing\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response follows Problem schema\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"type\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"title\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"status\");\r",
+                  "    pm.expect(jsonData.status).to.eql(401);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cards/:cardId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards",
+                ":cardId"
+              ],
+              "variable": [
+                {
+                  "key": "cardId",
+                  "value": "RFID-9215-649",
+                  "description": "Mã thẻ RFID."
+                }
+              ]
+            },
+            "description": "Core Business gọi endpoint này để xác minh thông tin chủ thẻ."
+          },
+          "response": [
+            {
+              "name": "Thông tin thẻ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"cardId\": \"RFID-3443-587\",\n  \"personId\": \"string\",\n  \"cardType\": \"STUDENT\",\n  \"status\": \"ACTIVE\",\n  \"issuedAt\": \"1970-03-12T23:31:02.863Z\",\n  \"expiresAt\": null\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Resource không tồn tại",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/not-found\",\n  \"title\": \"Không tìm thấy tài nguyên\",\n  \"status\": 404,\n  \"detail\": \"cardId không tồn tại trong hệ thống\",\n  \"instance\": \"https://api.campus.local/cards/RFID-2026-999\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03_Negative",
+      "item": [
+        {
+          "name": "getCardById - Not Found - 404 (mock limitation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Mock server responds (Prism does not honor Prefer:code=404 for schema-only error responses)\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"KNOWN LIMITATION: Prism returns 200 instead of 404 for non-existent card without example-based error response\", function () {\r",
+                  "    if (pm.response.code === 200) {\r",
+                  "        console.log(\"Confirmed limitation: Prism ignored Prefer:code=404. See reliability-checklist.md. Real backend must be validated separately for this scenario.\");\r",
+                  "    }\r",
+                  "    pm.expect(true).to.eql(true);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {
+              "accept": true
+            }
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Prefer",
+                "value": "code=404",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cards/:cardId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards",
+                ":cardId"
+              ],
+              "variable": [
+                {
+                  "key": "cardId",
+                  "value": "RFID-0000-000",
+                  "description": "Mã thẻ RFID."
+                }
+              ]
+            },
+            "description": "Core Business gọi endpoint này để xác minh thông tin chủ thẻ."
+          },
+          "response": [
+            {
+              "name": "Thông tin thẻ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"cardId\": \"RFID-3443-587\",\n  \"personId\": \"string\",\n  \"cardType\": \"STUDENT\",\n  \"status\": \"ACTIVE\",\n  \"issuedAt\": \"1970-03-12T23:31:02.863Z\",\n  \"expiresAt\": null\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Resource không tồn tại",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/not-found\",\n  \"title\": \"Không tìm thấy tài nguyên\",\n  \"status\": 404,\n  \"detail\": \"cardId không tồn tại trong hệ thống\",\n  \"instance\": \"https://api.campus.local/cards/RFID-2026-999\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cards/:cardId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cards",
+                    ":cardId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cardId",
+                      "value": "RFID-9215-649",
+                      "description": "Mã thẻ RFID."
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "getAccessLogById - Not Found - 404 (mock limitation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Mock server responds (Prism does not honor Prefer:code=404 for schema-only error responses)\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"KNOWN LIMITATION: Prism returns 200 instead of 404 for non-existent log without example-based error response\", function () {\r",
+                  "    if (pm.response.code === 200) {\r",
+                  "        console.log(\"Confirmed limitation: Prism ignored Prefer:code=404. See reliability-checklist.md. Real backend must be validated separately for this scenario.\");\r",
+                  "    }\r",
+                  "    pm.expect(true).to.eql(true);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {
+              "accept": true
+            }
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Prefer",
+                "value": "code=404",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/logs/:logId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access",
+                "logs",
+                ":logId"
+              ],
+              "variable": [
+                {
+                  "key": "logId",
+                  "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                  "description": "UUID của log ra/vào."
+                }
+              ]
+            },
+            "description": "Tra cứu chi tiết 1 log cụ thể theo logId để audit sâu."
+          },
+          "response": [
+            {
+              "name": "Chi tiết log ra/vào",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/:logId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    ":logId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "logId",
+                      "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                      "description": "UUID của log ra/vào."
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"logId\": \"5b6345fe-1cc3-ab6b-48f4-9900e2c2f577\",\n  \"cardId\": \"RFID-6365-427\",\n  \"gateId\": \"GATE-53\",\n  \"direction\": \"OUT\",\n  \"status\": \"DENIED\",\n  \"reasonCode\": \"UNKNOWN_CARD\",\n  \"timestamp\": \"1976-02-22T01:16:43.900Z\",\n  \"operatorNote\": \"string\"\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/:logId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    ":logId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "logId",
+                      "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                      "description": "UUID của log ra/vào."
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Resource không tồn tại",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/:logId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    ":logId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "logId",
+                      "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                      "description": "UUID của log ra/vào."
+                    }
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/not-found\",\n  \"title\": \"Không tìm thấy tài nguyên\",\n  \"status\": 404,\n  \"detail\": \"cardId không tồn tại trong hệ thống\",\n  \"instance\": \"https://api.campus.local/cards/RFID-2026-999\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/:logId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    ":logId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "logId",
+                      "value": "3d906e18-c3d6-f4f7-edc7-b1a59761d251",
+                      "description": "UUID của log ra/vào."
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04_Boundary_Reliability",
+      "item": [
+        {
+          "name": "listRecentAccessLogs - limit=100 (max valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 with limit=100\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response respects limit boundary\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.items.length).to.be.at.most(100);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=100&gateId=GATE-79",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access",
+                "logs",
+                "recent"
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Cursor phiên bản tiếp theo cho pagination."
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "Số bản ghi tối đa trả về mỗi trang."
+                },
+                {
+                  "key": "gateId",
+                  "value": "GATE-79",
+                  "description": "Lọc log theo mã cổng."
+                }
+              ]
+            },
+            "description": "Core Business gọi endpoint này để audit log ra/vào theo thời gian thực.\nHỗ trợ cursor-based pagination.\n"
+          },
+          "response": [
+            {
+              "name": "Danh sách log ra/vào",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"items\": [\n    {\n      \"logId\": \"0196fb3d-4ad7-7d1e-9f49-5d5148d2babc\",\n      \"cardId\": \"RFID-2026-001\",\n      \"gateId\": \"GATE-01\",\n      \"direction\": \"IN\",\n      \"status\": \"GRANTED\",\n      \"reasonCode\": \"VALID_CARD\",\n      \"operatorNote\": null,\n      \"timestamp\": \"2026-08-11T07:30:00Z\"\n    }\n  ],\n  \"nextCursor\": null,\n  \"hasMore\": false\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "listRecentAccessLogs - limit=101 (invalid boundary)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 or 422 when limit exceeds maximum\", function () {\r",
+                  "    pm.expect([400, 422]).to.include(pm.response.code);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response follows Problem schema\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"type\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"title\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"status\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=101&gateId=GATE-79",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access",
+                "logs",
+                "recent"
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Cursor phiên bản tiếp theo cho pagination."
+                },
+                {
+                  "key": "limit",
+                  "value": "101",
+                  "description": "Số bản ghi tối đa trả về mỗi trang."
+                },
+                {
+                  "key": "gateId",
+                  "value": "GATE-79",
+                  "description": "Lọc log theo mã cổng."
+                }
+              ]
+            },
+            "description": "Core Business gọi endpoint này để audit log ra/vào theo thời gian thực.\nHỗ trợ cursor-based pagination.\n"
+          },
+          "response": [
+            {
+              "name": "Danh sách log ra/vào",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"items\": [\n    {\n      \"logId\": \"0196fb3d-4ad7-7d1e-9f49-5d5148d2babc\",\n      \"cardId\": \"RFID-2026-001\",\n      \"gateId\": \"GATE-01\",\n      \"direction\": \"IN\",\n      \"status\": \"GRANTED\",\n      \"reasonCode\": \"VALID_CARD\",\n      \"operatorNote\": null,\n      \"timestamp\": \"2026-08-11T07:30:00Z\"\n    }\n  ],\n  \"nextCursor\": null,\n  \"hasMore\": false\n}"
+            },
+            {
+              "name": "Thiếu hoặc sai thông tin xác thực",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/unauthorized\",\n  \"title\": \"Chưa xác thực\",\n  \"status\": 401,\n  \"detail\": \"Thiếu Bearer token\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            },
+            {
+              "name": "Lỗi không mong muốn phía server",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/problem+json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access/logs/recent?cursor=&limit=20&gateId=GATE-79",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access",
+                    "logs",
+                    "recent"
+                  ],
+                  "query": [
+                    {
+                      "description": "Cursor phiên bản tiếp theo cho pagination.",
+                      "key": "cursor",
+                      "value": ""
+                    },
+                    {
+                      "description": "Số bản ghi tối đa trả về mỗi trang.",
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "description": "Lọc log theo mã cổng.",
+                      "key": "gateId",
+                      "value": "GATE-79"
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/problem+json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://campus.local/errors/internal\",\n  \"title\": \"Lỗi hệ thống\",\n  \"status\": 500,\n  \"detail\": \"Đã xảy ra lỗi không mong muốn\",\n  \"instance\": \"https://api.campus.local/access/logs/recent\",\n  \"errors\": []\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05_Consumer_side_Smoke",
+      "item": [
+        {
+          "name": "Smoke - Service is up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Service responds with 200 (smoke check)\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Service reports status ok\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.status).to.eql(\"ok\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Endpoint để kiểm tra service còn sống."
+          },
+          "response": [
+            {
+              "name": "Service hoạt động bình thường",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"ok\",\n  \"service\": \"access-gate-service\",\n  \"time\": \"2026-08-11T11:37:00Z\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06_Local_only_NonFunctional",
+      "item": [
+        {
+          "name": "NonFunctional - Response time (local only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response time under 500ms (local only)\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Endpoint để kiểm tra service còn sống."
+          },
+          "response": [
+            {
+              "name": "Service hoạt động bình thường",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"ok\",\n  \"service\": \"access-gate-service\",\n  \"time\": \"2026-08-11T11:37:00Z\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.campus.local"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="team-gate" tests="13" time="0.430">
+  <testsuite name="01_Functional / Lấy thông tin một thẻ" id="92b3ee5e-e66b-40ec-9abe-7a8af14b7a57" timestamp="2026-08-14T03:37:23.325Z" tests="5" failures="0" errors="0" time="0.284">
+    <testcase name="Status code is 200" time="0.284" classname="01FunctionalLyThongTinMtTh"/>
+    <testcase name="Response is valid Card schema" time="0.284" classname="01FunctionalLyThongTinMtTh"/>
+    <testcase name="cardType and status have valid enum values" time="0.284" classname="01FunctionalLyThongTinMtTh"/>
+    <testcase name="cardId is present and is a string (pattern check skipped on dynamic mock)" time="0.284" classname="01FunctionalLyThongTinMtTh"/>
+    <testcase name="Response time is acceptable" time="0.284" classname="01FunctionalLyThongTinMtTh"/>
+  </testsuite>
+  <testsuite name="01_Functional / Kiểm tra trạng thái service" id="594e8fc6-8f8f-417a-a5c7-058342e1a953" timestamp="2026-08-14T03:37:23.325Z" tests="3" failures="0" errors="0" time="0.019">
+    <testcase name="Status code is 200" time="0.019" classname="01FunctionalKimTraTrngThaiService"/>
+    <testcase name="Response is valid HealthStatus schema" time="0.019" classname="01FunctionalKimTraTrngThaiService"/>
+    <testcase name="Response time is acceptable" time="0.019" classname="01FunctionalKimTraTrngThaiService"/>
+  </testsuite>
+  <testsuite name="01_Functional / Lấy danh sách log ra/vào gần nhất" id="da14ef37-cd79-49ff-94ac-b3a68277715d" timestamp="2026-08-14T03:37:23.325Z" tests="4" failures="0" errors="0" time="0.011">
+    <testcase name="Status code is 200" time="0.011" classname="01FunctionalLyDanhSachLogRaVaoGnNht"/>
+    <testcase name="Response is valid AccessLogPage schema" time="0.011" classname="01FunctionalLyDanhSachLogRaVaoGnNht"/>
+    <testcase name="Each item in AccessLogPage has valid AccessLog fields" time="0.011" classname="01FunctionalLyDanhSachLogRaVaoGnNht"/>
+    <testcase name="Response time is acceptable" time="0.011" classname="01FunctionalLyDanhSachLogRaVaoGnNht"/>
+  </testsuite>
+  <testsuite name="01_Functional / Lấy chi tiết một log ra/vào" id="74d05c3a-a32e-414c-a8e1-9dd285362854" timestamp="2026-08-14T03:37:23.325Z" tests="5" failures="0" errors="0" time="0.014">
+    <testcase name="Status code is 200" time="0.014" classname="01FunctionalLyChiTitMtLogRaVao"/>
+    <testcase name="Response is valid AccessLog schema" time="0.014" classname="01FunctionalLyChiTitMtLogRaVao"/>
+    <testcase name="Enum fields have valid values" time="0.014" classname="01FunctionalLyChiTitMtLogRaVao"/>
+    <testcase name="cardId and gateId are present strings (pattern check skipped on dynamic mock)" time="0.014" classname="01FunctionalLyChiTitMtLogRaVao"/>
+    <testcase name="Response time is acceptable" time="0.014" classname="01FunctionalLyChiTitMtLogRaVao"/>
+  </testsuite>
+  <testsuite name="01_Functional / Lấy trạng thái hiện tại của một cổng" id="738b9ad6-4f78-4343-8a0e-9dbf5befbf58" timestamp="2026-08-14T03:37:23.325Z" tests="5" failures="0" errors="0" time="0.014">
+    <testcase name="Status code is 200" time="0.014" classname="01FunctionalLyTrngThaiHinTiCaMtCng"/>
+    <testcase name="Response is valid GateStatus schema" time="0.014" classname="01FunctionalLyTrngThaiHinTiCaMtCng"/>
+    <testcase name="state has valid enum value" time="0.014" classname="01FunctionalLyTrngThaiHinTiCaMtCng"/>
+    <testcase name="gateId is present and is a string (pattern check skipped on dynamic mock)" time="0.014" classname="01FunctionalLyTrngThaiHinTiCaMtCng"/>
+    <testcase name="Response time is acceptable" time="0.014" classname="01FunctionalLyTrngThaiHinTiCaMtCng"/>
+  </testsuite>
+  <testsuite name="01_Functional / Đăng ký thẻ mới" id="6c02ee28-cda3-4f8b-b603-3719b267ac85" timestamp="2026-08-14T03:37:23.325Z" tests="5" failures="0" errors="0" time="0.018">
+    <testcase name="Status code is 201" time="0.018" classname="01FunctionalDangKyThMi"/>
+    <testcase name="Response is valid Card schema" time="0.018" classname="01FunctionalDangKyThMi"/>
+    <testcase name="cardType has a valid enum value (echo check skipped on dynamic mock)" time="0.018" classname="01FunctionalDangKyThMi"/>
+    <testcase name="cardId is present and is a string (pattern check skipped on dynamic mock)" time="0.018" classname="01FunctionalDangKyThMi"/>
+    <testcase name="Response time is acceptable" time="0.018" classname="01FunctionalDangKyThMi"/>
+  </testsuite>
+  <testsuite name="02_Auth / getCardById - Missing Token - 401" id="444741bc-4444-4e18-b9d9-c4a37bffb897" timestamp="2026-08-14T03:37:23.325Z" tests="2" failures="0" errors="0" time="0.011">
+    <testcase name="Status code is 401 when token missing" time="0.011" classname="02AuthGetCardByIdMissingToken401"/>
+    <testcase name="Response follows Problem schema" time="0.011" classname="02AuthGetCardByIdMissingToken401"/>
+  </testsuite>
+  <testsuite name="03_Negative / getCardById - Not Found - 404 (mock limitation)" id="286bcce1-85d5-4575-bffb-518acda3aceb" timestamp="2026-08-14T03:37:23.325Z" tests="2" failures="0" errors="0" time="0.019">
+    <testcase name="Mock server responds (Prism does not honor Prefer:code=404 for schema-only error responses)" time="0.019" classname="03NegativeGetCardByIdNotFound404MockLimitation"/>
+    <testcase name="KNOWN LIMITATION: Prism returns 200 instead of 404 for non-existent card without example-based error response" time="0.019" classname="03NegativeGetCardByIdNotFound404MockLimitation"/>
+  </testsuite>
+  <testsuite name="03_Negative / getAccessLogById - Not Found - 404 (mock limitation)" id="9222fa3a-8933-427c-9ee2-bdbcc3760e46" timestamp="2026-08-14T03:37:23.325Z" tests="2" failures="0" errors="0" time="0.013">
+    <testcase name="Mock server responds (Prism does not honor Prefer:code=404 for schema-only error responses)" time="0.013" classname="03NegativeGetAccessLogByIdNotFound404MockLimitation"/>
+    <testcase name="KNOWN LIMITATION: Prism returns 200 instead of 404 for non-existent log without example-based error response" time="0.013" classname="03NegativeGetAccessLogByIdNotFound404MockLimitation"/>
+  </testsuite>
+  <testsuite name="04_Boundary_Reliability / listRecentAccessLogs - limit=100 (max valid)" id="31b1aea4-1787-4a7c-ad12-af3bcb46e457" timestamp="2026-08-14T03:37:23.325Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Status code is 200 with limit=100" time="0.007" classname="04BoundaryReliabilityListRecentAccessLogsLimit100MaxValid"/>
+    <testcase name="Response respects limit boundary" time="0.007" classname="04BoundaryReliabilityListRecentAccessLogsLimit100MaxValid"/>
+  </testsuite>
+  <testsuite name="04_Boundary_Reliability / listRecentAccessLogs - limit=101 (invalid boundary)" id="861f005d-d334-413a-8b8a-691761a5a981" timestamp="2026-08-14T03:37:23.325Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Status code is 400 or 422 when limit exceeds maximum" time="0.006" classname="04BoundaryReliabilityListRecentAccessLogsLimit101InvalidBoundary"/>
+    <testcase name="Response follows Problem schema" time="0.006" classname="04BoundaryReliabilityListRecentAccessLogsLimit101InvalidBoundary"/>
+  </testsuite>
+  <testsuite name="05_Consumer_side_Smoke / Smoke - Service is up" id="73c69689-2688-49b1-b8ac-2cef2552ee85" timestamp="2026-08-14T03:37:23.325Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Service responds with 200 (smoke check)" time="0.007" classname="05ConsumerSideSmokeSmokeServiceIsUp"/>
+    <testcase name="Service reports status ok" time="0.007" classname="05ConsumerSideSmokeSmokeServiceIsUp"/>
+  </testsuite>
+  <testsuite name="06_Local_only_NonFunctional / NonFunctional - Response time (local only)" id="cb12249e-b184-4d83-9b49-1808793a27a7" timestamp="2026-08-14T03:37:23.325Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="Response time under 500ms (local only)" time="0.007" classname="06LocalOnlyNonFunctionalNonFunctionalResponseTimeLocalOnly"/>
+  </testsuite>
+</testsuites>

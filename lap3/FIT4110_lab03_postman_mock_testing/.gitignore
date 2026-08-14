@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+.env
+reports/*.xml
+reports/*.html
+prism.log
+!reports/newman-report.html
+!reports/newman-report.xml

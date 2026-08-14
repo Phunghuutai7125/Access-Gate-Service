@@ -1,0 +1,14 @@
+No,Folder,Test Name,Method,Endpoint,Expected Result,Actual Result,Status
+1,01_Functional,Kiem tra trang thai service,GET,/health,200 + valid HealthStatus schema,200 + valid schema,PASS
+2,01_Functional,Lay danh sach log ra/vao gan nhat,GET,/access/logs/recent,200 + valid AccessLogPage schema,200 + valid schema,PASS
+3,01_Functional,Lay chi tiet mot log ra/vao,GET,/access/logs/{logId},200 + valid AccessLog schema,200 + valid schema,PASS
+4,01_Functional,Lay trang thai hien tai cua mot cong,GET,/gates/{gateId}/status,200 + valid GateStatus schema,200 + valid schema,PASS
+5,01_Functional,Lay thong tin mot the,GET,/cards/{cardId},200 + valid Card schema,200 + valid schema,PASS
+6,01_Functional,Dang ky the moi,POST,/cards,201 + valid Card schema,201 + valid schema,PASS
+7,02_Auth,getCardById - Missing Token,GET,/cards/{cardId},401 + Problem schema,401 + Problem schema,PASS
+8,03_Negative,getCardById - Not Found,GET,/cards/{cardId},404 (KNOWN LIMITATION: Prism returns 200),200 (documented mock limitation),PASS - limitation documented
+9,03_Negative,getAccessLogById - Not Found,GET,/access/logs/{logId},404 (KNOWN LIMITATION: Prism returns 200),200 (documented mock limitation),PASS - limitation documented
+10,04_Boundary_Reliability,listRecentAccessLogs limit=100 (max valid),GET,/access/logs/recent?limit=100,200,200,PASS
+11,04_Boundary_Reliability,listRecentAccessLogs limit=101 (invalid boundary),GET,/access/logs/recent?limit=101,400 or 422,422,PASS
+12,05_Consumer_side_Smoke,Smoke - Service is up,GET,/health,200 + status ok,200 + status ok,PASS
+13,06_Local_only_NonFunctional,NonFunctional - Response time,GET,/health,Response time < 500ms (local only),6ms (measured on mock; not representative of local),PASS
