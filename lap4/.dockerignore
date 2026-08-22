@@ -1,0 +1,13 @@
+.git
+.gitignore
+.venv
+__pycache__/
+*.pyc
+node_modules
+reports/
+postman/
+docs/
+scripts/
+.env
+*.md
+.spectral.yaml

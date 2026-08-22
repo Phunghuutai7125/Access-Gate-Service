@@ -1,0 +1,17 @@
+{
+  "name": "fit4110_lab04_docker_packaging_team_gate",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FIT4110 Lab 04 - Docker packaging cho Access Gate Service",
+  "scripts": {
+    "install:cli": "npm install",
+    "lint:contract": "spectral lint contracts/team-gate.openapi.yaml --fail-severity error",
+    "test:local": "newman run postman/collections/team-gate.postman_collection.json -e postman/environments/lab04_local.postman_environment.json --reporters cli,junit,htmlextra --reporter-junit-export reports/newman-lab04-local.xml --reporter-htmlextra-export reports/newman-lab04-local.html"
+  },
+  "devDependencies": {
+    "@stoplight/prism-cli": "^5.14.2",
+    "@stoplight/spectral-cli": "^6.11.1",
+    "newman": "^6.2.2",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}
