@@ -1,9 +1,5 @@
 # 🚪 ACCESS GATE SYSTEM
 
-> **Hệ thống kiểm soát ra/vào bằng Access Gate**
-
-# 🚪 ACCESS GATE SYSTEM
-
 ### Môn học: Dịch vụ kết nối và Công nghệ nền tảng
 
 ---
