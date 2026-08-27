@@ -1,18 +1,18 @@
 # 🚪 ACCESS GATE SYSTEM
 
 > **Hệ thống kiểm soát ra/vào bằng Access Gate**
-> **Thành viên nhóm:**
-| STT | Họ và tên         | Đóng Góp              |
-| --: | ----------------- | --------------------- |
-|   1 | Phùng Hữu Tài.    | 40%                   |
-|   2 | Nguyễn Mạnh Cường | 30%                   |
-|   3 | Nguyễn Quang Duy  | 30%                   |
 
 # 🚪 ACCESS GATE SYSTEM
 
 ### Môn học: Dịch vụ kết nối và Công nghệ nền tảng
 
 ---
+**Thành Viên Nhóm**
+| STT | Họ và tên         | Đóng Góp              |
+| --: | ----------------- | --------------------- |
+|   1 | Phùng Hữu Tài.    | 40%                   |
+|   2 | Nguyễn Mạnh Cường | 30%                   |
+|   3 | Nguyễn Quang Duy  | 30%                   |
 
 ## 1. Giới thiệu
 
