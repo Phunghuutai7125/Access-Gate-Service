@@ -5,6 +5,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY src/__init__.py ./src/__init__.py
+COPY src/db.py ./src/db.py
 COPY src/mqtt_listener/ ./src/mqtt_listener/
 COPY data/ ./data/
 

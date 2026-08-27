@@ -69,6 +69,26 @@ services:
       - team-internal
       - class-net
 
+  mqtt-listener:
+    build:
+      context: ../lap6
+      dockerfile: Dockerfile
+    container_name: fit4110-mqtt-listener
+    restart: unless-stopped
+    env_file:
+      - ../lap6/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - team-internal
+
 networks:
   team-internal:
     driver: bridge

@@ -1,10 +1,12 @@
 """
 mqtt_listener - AccessGate Service (team-gate)
-Nhan UID raw tu HiveMQ, doi chieu uid_whitelist.csv, publish ket qua xu ly.
+Nhan UID raw tu HiveMQ, doi chieu uid_whitelist.csv, publish ket qua xu ly,
+va GHI THAT vao bang access_logs (cung Postgres voi REST API lap5) de
+Core Business goi GET /access/logs/recent thay duoc du lieu that.
 
 Chay doc lap voi REST API (main.py trong access_gate) - day la them 1 service moi,
 KHONG thay the REST API. REST API van phuc vu Pair-03 (Core Business goi vao).
-mqtt_listener phu trach Pair-09 that (publish event that qua MQTT thay vi gate-worker gia lap).
+mqtt_listener phu trach Pair-09 that (publish event that qua MQTT + ghi DB that).
 """
 import os
 import ssl
@@ -14,8 +16,10 @@ import uuid
 from datetime import datetime, timezone
 
 from paho.mqtt import client as mqtt
+from sqlalchemy import text
 
 from src.mqtt_listener.whitelist import load_whitelist
+from src.db import engine, wait_for_db_and_init
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("mqtt_listener")
@@ -76,6 +80,30 @@ def process_uid(payload: dict) -> dict:
     return result
 
 
+def save_to_db(result: dict):
+    """Ghi that vao bang access_logs - cung Postgres ma REST API (lap5) dang doc.
+    Loi ghi DB khong duoc chan luong xu ly MQTT chinh (best-effort, giong notify_gate_worker)."""
+    try:
+        with engine.connect() as conn:
+            conn.execute(
+                text("""
+                    INSERT INTO access_logs (log_id, card_id, gate_id, direction, status, reason_code, ts)
+                    VALUES (:log_id, :card_id, :gate_id, :direction, :status, :reason_code, now())
+                """),
+                {
+                    "log_id": str(uuid.uuid4()),
+                    "card_id": result["uid"],
+                    "gate_id": result["door_id"],
+                    "direction": result["direction"].upper(),
+                    "status": "GRANTED" if result["access_result"] == "granted" else "DENIED",
+                    "reason_code": result["reason"].upper(),
+                },
+            )
+            conn.commit()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Khong ghi duoc vao Postgres (event van da publish MQTT thanh cong): %s", exc)
+
+
 def on_connect(client, userdata, flags, reason_code, properties=None):
     logger.info("Ket noi MQTT: %s", reason_code)
     client.subscribe(INPUT_TOPIC, qos=1)
@@ -96,6 +124,7 @@ def on_message(client, userdata, message):
 
     result = process_uid(payload)
     client.publish(OUTPUT_TOPIC, json.dumps(result), qos=1)
+    save_to_db(result)
     logger.info(
         "UID=%s -> %s (%s) | door=%s | published to %s",
         result["uid"], result["access_result"], result["reason"], result["door_id"], OUTPUT_TOPIC,
@@ -114,6 +143,7 @@ def build_client() -> mqtt.Client:
 
 
 def main():
+    wait_for_db_and_init()
     client = build_client()
     client.connect(MQTT_HOST, MQTT_PORT)
     client.loop_forever()
