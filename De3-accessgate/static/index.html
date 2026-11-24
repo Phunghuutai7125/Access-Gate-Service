@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Campus — Access Gate Simulator & Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes pulse-gate {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+    .barrier-open {
+      transform: rotate(-75deg);
+      transform-origin: left bottom;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .barrier-closed {
+      transform: rotate(0deg);
+      transform-origin: left bottom;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-950/70 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+          <i class="fa-solid fa-id-card-clip text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Access Gate Service</h1>
+          <p class="text-xs text-slate-400">Smart Campus Operations Platform &bull; Nhóm AccessGate</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+          Core Business: Connected
+        </span>
+        <a href="/docs" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center space-x-1">
+          <i class="fa-solid fa-book text-slate-400"></i>
+          <span>Swagger Docs</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <!-- Top Grid: Barrier Simulator & Status -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Card Simulator Form (7 cols) -->
+      <div class="lg:col-span-7 bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-xl backdrop-blur">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-700/50 pb-3">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-tower-broadcast text-blue-400"></i>
+            <h2 class="text-base font-semibold text-white">Mô phỏng Quẹt Thẻ Barrier</h2>
+          </div>
+          <span class="text-xs font-mono bg-slate-900 text-blue-400 px-2 py-1 rounded border border-slate-700">POST /access/swipe</span>
+        </div>
+
+        <form id="swipeForm" onsubmit="handleSwipe(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Mã cổng (gateId)</label>
+              <input type="text" id="gateId" value="GATE-01" required
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500 font-mono">
+              <div class="flex space-x-2 mt-1">
+                <button type="button" onclick="setGate('GATE-01')" class="text-[11px] text-slate-400 hover:text-blue-400">#GATE-01</button>
+                <button type="button" onclick="setGate('GATE-79')" class="text-[11px] text-slate-400 hover:text-blue-400">#GATE-79</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Chiều di chuyển (direction)</label>
+              <select id="direction" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                <option value="IN">IN (Vào khuôn viên)</option>
+                <option value="OUT">OUT (Ra khuôn viên)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Mã thẻ RFID (cardId)</label>
+            <div class="relative">
+              <input type="text" id="cardId" value="RFID-2026-001" required
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500 font-mono pr-24">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400 font-mono">RFID-YYYY-NNN</span>
+            </div>
+            <!-- Quick preset cards -->
+            <div class="space-y-1.5 mt-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-400">Chọn nhanh thẻ Sinh viên thật (Dữ liệu lớp của thầy):</span>
+                <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">10 SV CNTT-K19</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1 bg-slate-950/60 rounded-xl border border-slate-800">
+                <button type="button" onclick="setCard('RFID-2026-001')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV001 - An</button>
+                <button type="button" onclick="setCard('RFID-2026-002')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV002 - Bình</button>
+                <button type="button" onclick="setCard('RFID-2026-003')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV003 - Cường</button>
+                <button type="button" onclick="setCard('RFID-2026-004')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV004 - Dung</button>
+                <button type="button" onclick="setCard('RFID-2026-005')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV005 - Hiếu</button>
+                <button type="button" onclick="setCard('RFID-2026-006')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV006 - Lan</button>
+                <button type="button" onclick="setCard('RFID-2026-007')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV007 - Minh</button>
+                <button type="button" onclick="setCard('RFID-2026-008')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV008 - Nam</button>
+                <button type="button" onclick="setCard('RFID-2026-009')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV009 - Thảo</button>
+                <button type="button" onclick="setCard('RFID-2026-010')" class="text-xs bg-slate-800 hover:bg-blue-600 px-2 py-1 rounded-lg text-slate-200 font-mono transition">SV010 - Quân</button>
+                <button type="button" onclick="setCard('RFID-9999-999')" class="text-xs bg-rose-950/80 hover:bg-rose-800 border border-rose-800/80 px-2 py-1 rounded-lg text-rose-300 font-mono transition">Thẻ Lạ (Deny)</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Bearer Token (Header Authorization)</label>
+            <input type="text" id="apiToken" value="dev-secret-token"
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500 font-mono text-xs">
+          </div>
+
+          <button type="submit" id="btnSwipe"
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium py-2.5 px-4 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-wifi"></i>
+            <span>QUẸT THẺ (SWIPE NOW)</span>
+          </button>
+        </form>
+
+        <!-- Result Box -->
+        <div id="resultBox" class="mt-4 p-4 rounded-xl border border-slate-700 bg-slate-900/80 hidden transition-all">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Kết quả đánh giá</span>
+            <span id="badgeResult" class="px-2.5 py-0.5 rounded-full text-xs font-bold"></span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-2">
+            <div><span class="text-slate-400">Reason:</span> <span id="resReason" class="font-mono font-semibold text-white"></span></div>
+            <div><span class="text-slate-400">Source:</span> <span id="resSource" class="font-mono text-white"></span></div>
+            <div><span class="text-slate-400">Decision ID:</span> <span id="resDecisionId" class="font-mono text-white truncate block"></span></div>
+            <div><span class="text-slate-400">Time:</span> <span id="resTime" class="font-mono text-white"></span></div>
+          </div>
+          <pre id="resRawJson" class="text-[11px] font-mono bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-slate-300 overflow-x-auto max-h-36"></pre>
+        </div>
+      </div>
+
+      <!-- Barrier Simulation & Visual Gate Status (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col space-y-6">
+        <!-- Visual Barrier Graphic -->
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-xl backdrop-blur flex-1 flex flex-col justify-between">
+          <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
+            <h3 class="text-sm font-semibold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-traffic-light text-yellow-400"></i>
+              <span>Cổng Barrier Trực Quan</span>
+            </h3>
+            <span id="gateStateText" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-slate-700 text-slate-300">CLOSED</span>
+          </div>
+
+          <!-- Barrier Graphic representation -->
+          <div class="my-6 flex flex-col items-center justify-center">
+            <div class="relative w-64 h-36 flex items-end justify-center border-b-4 border-slate-700 pb-2">
+              <!-- Pillar Left -->
+              <div class="w-10 h-28 bg-gradient-to-t from-slate-700 to-slate-600 rounded-t-lg relative flex flex-col items-center justify-start pt-2 shadow-lg">
+                <!-- Status LED -->
+                <div id="gateLed" class="w-4 h-4 rounded-full bg-rose-500 shadow-md shadow-rose-500/50 transition-colors"></div>
+                <div class="text-[9px] font-mono text-slate-300 mt-2">GATE</div>
+              </div>
+
+              <!-- Barrier Arm -->
+              <div id="barrierArm" class="barrier-closed absolute left-[78px] bottom-7 h-3 w-44 bg-gradient-to-r from-yellow-400 via-rose-500 to-yellow-400 rounded-full border border-slate-950 shadow-md z-10"></div>
+
+              <!-- Car / Person Icon -->
+              <div id="avatarPass" class="absolute bottom-2 text-2xl text-slate-600 transition-all">
+                <i class="fa-solid fa-person-walking"></i>
+              </div>
+            </div>
+            <p id="barrierNotice" class="text-xs text-slate-400 mt-2 font-mono">Đang chờ quẹt thẻ...</p>
+          </div>
+
+          <!-- Fast actions: Check Gate Status -->
+          <div class="pt-3 border-t border-slate-700/50 flex items-center justify-between text-xs">
+            <span class="text-slate-400">Tra cứu nhanh cổng:</span>
+            <button onclick="fetchGateStatus()" class="text-blue-400 hover:text-blue-300 transition flex items-center space-x-1">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Cập nhật trạng thái cổng</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Fast Card Register Form -->
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 shadow-xl backdrop-blur">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-address-card text-emerald-400"></i>
+              <span>Đăng Ký Thẻ Mới (/cards)</span>
+            </h3>
+          </div>
+          <form id="regCardForm" onsubmit="handleRegisterCard(event)" class="space-y-2.5 text-xs">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-slate-400">Mã thẻ RFID</label>
+                <input type="text" id="regCardId" placeholder="RFID-2026-888" required
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-mono text-xs">
+              </div>
+              <div>
+                <label class="text-slate-400">Mã Person/SV</label>
+                <input type="text" id="regPersonId" placeholder="SV123" required
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-mono text-xs">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-slate-400">Loại thẻ</label>
+                <select id="regCardType" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-xs">
+                  <option value="STUDENT">STUDENT</option>
+                  <option value="STAFF">STAFF</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-slate-400">Mã SV / Khoa</label>
+                <input type="text" id="regExtra" placeholder="DNU2026123" required
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-mono text-xs">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg transition font-medium">
+              Đăng ký thẻ mới
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section: Logs Audit Table -->
+    <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-xl backdrop-blur">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-700/50 gap-3">
+        <div>
+          <h2 class="text-base font-semibold text-white flex items-center space-x-2">
+            <i class="fa-solid fa-list-check text-indigo-400"></i>
+            <span>Nhật Ký Quẹt Thẻ Ra/Vào (/access/logs/recent)</span>
+          </h2>
+          <p class="text-xs text-slate-400">Lịch sử quẹt thẻ phục vụ Core Business audit và Analytics Service</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <label class="flex items-center space-x-1.5 text-xs text-slate-300 bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-slate-800 transition">
+            <input type="checkbox" id="chkAutoRefresh" checked onchange="toggleAutoRefresh()" class="rounded text-blue-600 focus:ring-0">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-0.5"></span>
+            <span>Tự động cập nhật (3s)</span>
+          </label>
+          <input type="text" id="filterGateId" placeholder="Lọc theo Gate..." class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white font-mono w-32">
+          <button onclick="loadRecentLogs()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 shadow">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Tải lại</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto mt-4">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-900/80 text-slate-400 font-mono text-[11px] uppercase tracking-wider border-b border-slate-700/60">
+            <tr>
+              <th class="py-2.5 px-3">Thời gian (UTC)</th>
+              <th class="py-2.5 px-3">Thẻ RFID</th>
+              <th class="py-2.5 px-3">Cổng</th>
+              <th class="py-2.5 px-3">Chiều</th>
+              <th class="py-2.5 px-3">Trạng thái</th>
+              <th class="py-2.5 px-3">Reason Code</th>
+              <th class="py-2.5 px-3">Decision ID</th>
+              <th class="py-2.5 px-3">Log ID</th>
+            </tr>
+          </thead>
+          <tbody id="logsTableBody" class="divide-y divide-slate-800">
+            <tr>
+              <td colspan="8" class="text-center py-6 text-slate-500">Đang tải dữ liệu log...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Script logic -->
+  <script>
+    const API_BASE = window.location.origin;
+
+    function getAuthHeader() {
+      const token = document.getElementById('apiToken').value.trim();
+      return token ? { 'Authorization': `Bearer ${token}` } : {};
+    }
+
+    function setCard(id) { document.getElementById('cardId').value = id; }
+    function setGate(id) { document.getElementById('gateId').value = id; }
+
+    // Quẹt thẻ (POST /access/swipe)
+    async function handleSwipe(event) {
+      event.preventDefault();
+      const btn = document.getElementById('btnSwipe');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Đang kiểm tra Core Business...</span>`;
+
+      const payload = {
+        cardId: document.getElementById('cardId').value.trim(),
+        gateId: document.getElementById('gateId').value.trim(),
+        direction: document.getElementById('direction').value
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/access/swipe`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        renderSwipeResult(res.status, data);
+        loadRecentLogs(); // refresh table
+      } catch (err) {
+        alert("Lỗi kết nối API Access Gate: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-wifi"></i><span>QUẸT THẺ (SWIPE NOW)</span>`;
+      }
+    }
+
+    function renderSwipeResult(status, data) {
+      const box = document.getElementById('resultBox');
+      const badge = document.getElementById('badgeResult');
+      const arm = document.getElementById('barrierArm');
+      const led = document.getElementById('gateLed');
+      const stateText = document.getElementById('gateStateText');
+      const notice = document.getElementById('barrierNotice');
+      const avatar = document.getElementById('avatarPass');
+
+      box.classList.remove('hidden');
+      document.getElementById('resReason').innerText = data.reasonCode || 'N/A';
+      document.getElementById('resSource').innerText = data.decisionSource || 'N/A';
+      document.getElementById('resDecisionId').innerText = data.decisionId || 'None';
+      document.getElementById('resTime').innerText = data.timestamp ? data.timestamp.split('T')[1].replace('Z','') : '';
+      document.getElementById('resRawJson').innerText = JSON.stringify(data, null, 2);
+
+      if (data.accessGranted || data.result === 'ALLOW') {
+        badge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        badge.innerText = "ACCESS GRANTED (ALLOW)";
+
+        // Visual Barrier Animation
+        arm.className = "barrier-open absolute left-[78px] bottom-7 h-3 w-44 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full border border-slate-950 shadow-md z-10";
+        led.className = "w-4 h-4 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/80";
+        stateText.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-400";
+        stateText.innerText = "OPEN (MỞ CỔNG)";
+        notice.innerText = "Cổng đã mở! Mời vào.";
+        avatar.className = "absolute bottom-2 left-28 text-2xl text-emerald-400 transition-all duration-700";
+
+        // Tự động đóng sau 3.5 giây
+        setTimeout(() => {
+          arm.className = "barrier-closed absolute left-[78px] bottom-7 h-3 w-44 bg-gradient-to-r from-yellow-400 via-rose-500 to-yellow-400 rounded-full border border-slate-950 shadow-md z-10";
+          led.className = "w-4 h-4 rounded-full bg-rose-500 shadow-md shadow-rose-500/50";
+          stateText.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-slate-700 text-slate-300";
+          stateText.innerText = "CLOSED";
+          notice.innerText = "Cổng đã đóng. Sẵn sàng cho lượt quẹt mới.";
+          avatar.className = "absolute bottom-2 text-2xl text-slate-600 transition-all";
+        }, 3500);
+
+      } else {
+        badge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        badge.innerText = `ACCESS DENIED (${data.reasonCode || 'REJECTED'})`;
+
+        arm.className = "barrier-closed absolute left-[78px] bottom-7 h-3 w-44 bg-rose-600 rounded-full border border-slate-950 shadow-md z-10";
+        led.className = "w-4 h-4 rounded-full bg-rose-600 shadow-lg shadow-rose-600/80 animate-ping";
+        stateText.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-rose-500/20 text-rose-400";
+        stateText.innerText = "DENIED (CHẶN)";
+        notice.innerText = `Từ chối mở cổng! Lý do: ${data.reasonCode || 'Invalid'}`;
+        avatar.className = "absolute bottom-2 text-2xl text-rose-500 transition-all";
+
+        setTimeout(() => {
+          led.className = "w-4 h-4 rounded-full bg-rose-500 shadow-md shadow-rose-500/50";
+        }, 2000);
+      }
+    }
+
+    // Tra cứu trạng thái cổng (/gates/{gateId}/status)
+    async function fetchGateStatus() {
+      const gateId = document.getElementById('gateId').value.trim();
+      try {
+        const res = await fetch(`${API_BASE}/gates/${gateId}/status`, {
+          headers: getAuthHeader()
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('gateStateText').innerText = data.state;
+          document.getElementById('barrierNotice').innerText = `Cổng ${data.gateId}: ${data.state} (Cập nhật: ${data.updatedAt})`;
+        } else {
+          alert(`Không tìm thấy cổng: ${data.detail || 'Lỗi'}`);
+        }
+      } catch (e) {
+        alert("Lỗi tra cứu cổng: " + e.message);
+      }
+    }
+
+    // Đăng ký thẻ mới (/cards)
+    async function handleRegisterCard(event) {
+      event.preventDefault();
+      const cardType = document.getElementById('regCardType').value;
+      const cardId = document.getElementById('regCardId').value.trim();
+      const personId = document.getElementById('regPersonId').value.trim();
+      const extra = document.getElementById('regExtra').value.trim();
+
+      const body = {
+        cardType: cardType,
+        cardId: cardId,
+        personId: personId
+      };
+      if (cardType === 'STUDENT') {
+        body.studentCode = extra;
+      } else {
+        body.department = extra;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/cards`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+          },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (res.status === 201) {
+          alert(`Đăng ký thẻ ${data.cardId} thành công cho ${data.personId}!`);
+          setCard(data.cardId);
+          document.getElementById('regCardForm').reset();
+        } else {
+          alert(`Đăng ký thất bại: ${data.detail || JSON.stringify(data.errors)}`);
+        }
+      } catch (err) {
+        alert("Lỗi: " + err.message);
+      }
+    }
+
+    // Tải logs gần nhất (/access/logs/recent)
+    async function loadRecentLogs() {
+      const tbody = document.getElementById('logsTableBody');
+      const filterGate = document.getElementById('filterGateId').value.trim();
+      let url = `${API_BASE}/access/logs/recent?limit=25`;
+      if (filterGate) url += `&gateId=${filterGate}`;
+
+      try {
+        const res = await fetch(url, { headers: getAuthHeader() });
+        const data = await res.json();
+        if (!res.ok) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-rose-400">Lỗi tải log: ${data.detail || 'Unauthorized'}</td></tr>`;
+          return;
+        }
+
+        const items = data.items || [];
+        if (items.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-slate-500">Chưa có bản ghi quẹt thẻ nào.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = items.map(log => {
+          const isAllow = log.status === 'GRANTED' || log.result === 'ALLOW';
+          const badgeClass = isAllow 
+            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+            : 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
+
+          return `
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="py-2.5 px-3 font-mono text-[11px] text-slate-400">${log.timestamp || 'N/A'}</td>
+              <td class="py-2.5 px-3 font-mono font-medium text-white">${log.cardId}</td>
+              <td class="py-2.5 px-3 font-mono text-slate-300">${log.gateId}</td>
+              <td class="py-2.5 px-3 font-mono">
+                <span class="px-1.5 py-0.5 rounded text-[10px] ${log.direction === 'IN' ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'}">${log.direction}</span>
+              </td>
+              <td class="py-2.5 px-3">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${log.status}</span>
+              </td>
+              <td class="py-2.5 px-3 font-mono text-slate-300">${log.reasonCode || '—'}</td>
+              <td class="py-2.5 px-3 font-mono text-[10px] text-slate-400 truncate max-w-[120px]" title="${log.decisionId || ''}">${log.decisionId || '—'}</td>
+              <td class="py-2.5 px-3 font-mono text-[10px] text-slate-500 truncate max-w-[100px]" title="${log.logId}">${log.logId.substring(0,8)}...</td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-rose-400">Không thể kết nối API log.</td></tr>`;
+      }
+    }
+
+    // Auto refresh interval
+    let autoRefreshTimer = null;
+    function toggleAutoRefresh() {
+      const isChecked = document.getElementById('chkAutoRefresh').checked;
+      if (isChecked) {
+        if (!autoRefreshTimer) {
+          autoRefreshTimer = setInterval(() => {
+            loadRecentLogs();
+            fetchGateStatus();
+          }, 3000);
+        }
+      } else {
+        if (autoRefreshTimer) {
+          clearInterval(autoRefreshTimer);
+          autoRefreshTimer = null;
+        }
+      }
+    }
+
+    // Auto load on start
+    window.addEventListener('DOMContentLoaded', () => {
+      loadRecentLogs();
+      fetchGateStatus();
+      toggleAutoRefresh();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+data/Acessgate_uid_whitelist.csv

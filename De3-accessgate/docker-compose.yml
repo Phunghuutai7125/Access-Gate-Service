@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: accessgate-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-access_gate_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-access_gate_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - accessgate_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-access_gate_user} -d ${POSTGRES_DB:-access_gate_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - accessgate-net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: accessgate-service-api
+    restart: unless-stopped
+    env_file:
+      - .env.example
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-access_gate_db}
+      DB_USER: ${POSTGRES_USER:-access_gate_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      CORE_BUSINESS_URL: ${CORE_BUSINESS_URL:-http://192.168.1.61:8001}
+      MOCK_CORE: ${MOCK_CORE:-false}
+      ANALYTICS_MQTT_HOST: ${ANALYTICS_MQTT_HOST:-192.168.1.51}
+      ANALYTICS_MQTT_PORT: 1883
+      ANALYTICS_MQTT_TOPIC: access.events
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - accessgate-net
+
+networks:
+  accessgate-net:
+    driver: bridge
+
+volumes:
+  accessgate_db_data:
